@@ -1,0 +1,42 @@
+name: Trigger auto deployment for aca-id-test2
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ master ]
+    paths:
+    - '**'
+    - '.github/workflows/aca-id-test2-AutoDeployTrigger-8c8169b6-375f-45a9-9704-db1acef43086.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.ACAIDTEST2_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: osslabacr.azurecr.io
+          registryUsername: ${{ secrets.ACAIDTEST2_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.ACAIDTEST2_REGISTRY_PASSWORD }}
+          containerAppName: aca-id-test2
+          resourceGroup: RG-joaoribeiro
+          imageToBuild: osslabacr.azurecr.io/aca-id-test2:${{ github.sha }}
+          
+
+     
+
